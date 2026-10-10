@@ -1,8 +1,11 @@
 # Etapa de build
-FROM node:22-alpine AS build
+# Node 24: Angular CLI 22.2 exige Node >= 22.22.3 o >= 24.15.
+FROM node:24-alpine AS build
 WORKDIR /app
-COPY package.json ./
-RUN npm install
+# Se copia también package-lock.json y se usa `npm ci` para builds reproducibles
+# (mismas versiones exactas que en CI).
+COPY package.json package-lock.json ./
+RUN npm ci --no-audit --no-fund
 COPY . .
 RUN npm run build -- --configuration production
 
