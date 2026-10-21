@@ -1,8 +1,9 @@
-import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
+import { ApplicationConfig, inject, provideAppInitializer, provideZonelessChangeDetection } from '@angular/core';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { routes } from './app.routes';
 import { errorInterceptor } from './core/interceptors/error.interceptor';
+import { SessionService } from './core/services/session.service';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -10,6 +11,8 @@ export const appConfig: ApplicationConfig = {
     // el caso de que se prefiera mantener Zone.js por compatibilidad).
     provideZonelessChangeDetection(),
     provideRouter(routes),
-    provideHttpClient(withInterceptors([errorInterceptor]))
+    // XSRF activo por defecto: Angular reenvia la cookie XSRF-TOKEN del Gateway en X-XSRF-TOKEN.
+    provideHttpClient(withInterceptors([errorInterceptor])),
+    provideAppInitializer(() => inject(SessionService).load())
   ]
 };

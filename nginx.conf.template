@@ -1,5 +1,5 @@
 # Frontend + proxy de /api/ al Gateway (mismo origen: el bundle no lleva ninguna URL fija).
-# La imagen oficial de nginx sustituye ${GATEWAY_UPSTREAM} y ${NGINX_RESOLVER} al arrancar.
+# La imagen oficial de nginx sustituye ${GATEWAY_UPSTREAM}, ${KEYCLOAK_UPSTREAM} y ${NGINX_RESOLVER} al arrancar.
 server {
     listen 80;
     server_name _;
@@ -9,6 +9,7 @@ server {
     # Resolver + variable: el Gateway se resuelve en cada peticion (en ECS su IP cambia al redesplegar).
     resolver ${NGINX_RESOLVER} valid=10s ipv6=off;
     set $gateway ${GATEWAY_UPSTREAM};
+    set $keycloak ${KEYCLOAK_UPSTREAM};
 
     location /api/ {
         proxy_pass $gateway;
@@ -16,6 +17,22 @@ server {
         proxy_set_header Host $http_host;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Correlation-ID $http_x_correlation_id;
+    }
+
+    # Login OIDC (BFF, ADR-018): el Gateway gestiona sesion, login y logout.
+    location ~ ^/(auth/|oauth2/|login/oauth2/|logout$) {
+        proxy_pass $gateway;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+
+    # Keycloak por el mismo origen: pantallas de login y consola de cuenta sin exponer otro host.
+    location ~ ^/(realms|resources)/ {
+        proxy_pass $keycloak;
+        proxy_set_header Host $http_host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_buffer_size 16k;
+        proxy_buffers 8 16k;
     }
 
     location / {

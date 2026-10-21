@@ -14,5 +14,5 @@ FROM nginx:alpine
 COPY --from=build /app/dist/itinerarios-frontend/browser /usr/share/nginx/html
 COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 # Destino del proxy /api/: Compose usa estos valores; ECS los sobrescribe (Cloud Map + resolver de la VPC).
-ENV GATEWAY_UPSTREAM=http://gateway:8080     NGINX_RESOLVER=127.0.0.11
+ENV GATEWAY_UPSTREAM=http://gateway:8080     NGINX_RESOLVER=127.0.0.11 KEYCLOAK_UPSTREAM=http://keycloak:8080
 EXPOSE 80
