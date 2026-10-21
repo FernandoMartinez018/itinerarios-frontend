@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { SessionService } from '../../core/services/session.service';
 
 /** Barra de navegación global: marca, secciones y usuario con cierre de sesión. */
@@ -71,7 +71,6 @@ import { SessionService } from '../../core/services/session.service';
 })
 export class NavBarComponent {
   protected readonly session = inject(SessionService);
-  private readonly router = inject(Router);
 
   protected readonly initials = computed(() =>
     (this.session.userName() ?? '?')
@@ -84,6 +83,5 @@ export class NavBarComponent {
 
   protected logout(): void {
     this.session.logout();
-    this.router.navigateByUrl('/login');
   }
 }

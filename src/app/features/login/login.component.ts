@@ -1,11 +1,8 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
 import { SessionService } from '../../core/services/session.service';
 
 @Component({
   selector: 'app-login',
-  imports: [FormsModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="login">
@@ -29,19 +26,14 @@ import { SessionService } from '../../core/services/session.service';
         <div class="login__card card fade-in">
           <div class="login__logo" aria-hidden="true">✈</div>
           <h1>Itinerarios Personales</h1>
-          <p class="login__lead">Ingresa tu nombre para continuar.</p>
+          <p class="login__lead">Inicia sesión con tu cuenta para continuar.</p>
 
-          <form (ngSubmit)="onSubmit()" class="login__form">
-            <div class="field">
-              <label class="field__label" for="userName">Nombre</label>
-              <input id="userName" name="userName" type="text" class="input" placeholder="Ej. Ana Gómez"
-                     autocomplete="name" [(ngModel)]="userNameInput" required minlength="2" />
-            </div>
-            <button type="submit" class="btn btn--primary login__submit" [disabled]="userNameInput.trim().length < 2">
-              Entrar
+          <div class="login__form">
+            <button id="login-keycloak" type="button" class="btn btn--primary login__submit" (click)="onLogin()">
+              Iniciar sesión con Keycloak
             </button>
-          </form>
-          <p class="login__note">Autenticación de usuarios: fase posterior. Los servicios ya se protegen entre sí con OAuth2.</p>
+          </div>
+          <p class="login__note">Autenticación OpenID Connect: el Gateway gestiona la sesión y los tokens nunca llegan al navegador.</p>
         </div>
       </section>
     </div>
@@ -88,12 +80,8 @@ import { SessionService } from '../../core/services/session.service';
 })
 export class LoginComponent {
   private readonly sessionService = inject(SessionService);
-  private readonly router = inject(Router);
 
-  protected userNameInput = '';
-
-  onSubmit(): void {
-    this.sessionService.login(this.userNameInput);
-    this.router.navigateByUrl('/dashboard');
+  onLogin(): void {
+    this.sessionService.login();
   }
 }
